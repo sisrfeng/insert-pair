@@ -453,7 +453,7 @@ func! AutoPairsMap(key)
     execute 'inoremap <buffer> <silent> '.key." <C-R>=AutoPairsInsert('".escaped_key."')<CR>"
 endf
 
-func! AutoPairsToggle()
+func! g:AutoPairsToggle()
     if b:autopairs_enabled
         let b:autopairs_enabled = 0
         echo 'AutoPairs Disabled.'
@@ -667,7 +667,7 @@ endf
 
 " Always silent the command
 inoremap <silent> <SID>AutoPairsReturn <C-R>=AutoPairsReturn()<CR>
-imap <script> <Plug>AutoPairsReturn <SID>AutoPairsReturn
+imap <script>    <Plug>AutoPairsReturn <SID>AutoPairsReturn
 
 
 au BufEnter * :call AutoPairsTryInit()
