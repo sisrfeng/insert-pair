@@ -77,37 +77,37 @@ end
 
 if !exists('g:AutoPairsShortcutJump')
     let g:AutoPairsShortcutJump = '<M-n>'
-endif
+en
 
 " Fly mode will for closed pair to jump to closed pair instead of insert.
 " also support AutoPairsBackInsert to insert pairs where jumped.
 if !exists('g:AutoPairsFlyMode')
     let g:AutoPairsFlyMode = 0
-endif
+en
 
 " When skipping the closed pair, look at the current and
 " next line as well.
 if !exists('g:AutoPairsMultilineClose')
     let g:AutoPairsMultilineClose = 1
-endif
+en
 
 " Work with Fly Mode, insert pair where jumped
 if !exists('g:AutoPairsShortcutBackInsert')
     let g:AutoPairsShortcutBackInsert = '<M-b>'
-endif
+en
 
 if !exists('g:AutoPairsSmartQuotes')
     let g:AutoPairsSmartQuotes = 1
-endif
+en
 
 " 7.4.849 support <C-G>U to avoid breaking '.'
 " Issue talk: https://github.com/jiangmiao/auto-pairs/issues/3
 " Vim note: https://github.com/vim/vim/releases/tag/v7.4.849
 if v:version > 704 || v:version == 704 && has("patch849")
     let s:Go = "\<C-G>U"
-else
+el
     let s:Go = ""
-endif
+en
 
 let s:Left = s:Go."\<LEFT>"
 let s:Right = s:Go."\<RIGHT>"
@@ -270,7 +270,7 @@ func! AutoPairsInsert(key)
                 if before =~ '\V'.open.'\v\s*$' && m[0] =~ '\v\s'
                     " remove the space we inserted if the text in pairs is blank
                     return "\<DEL>".s:right(m[1:])
-                else
+                el
                     return s:right(m)
                 end
             end
@@ -278,11 +278,11 @@ func! AutoPairsInsert(key)
             if m != ''
                 if a:key == g:AutoPairsWildClosedPair || opt['multiline']
                     if b:autopairs_return_pos == line('.') && getline('.') =~ '\v^\s*$'
-                        normal! ddk$
+                        norm! ddk$
                     end
                     call search(m, 'We')
                     return "\<Right>"
-                else
+                el
                     break
                 end
             end
@@ -294,8 +294,8 @@ func! AutoPairsInsert(key)
     if g:AutoPairsFlyMode &&  a:key =~ '\v[\}\]\)]'
         if search(a:key, 'We')
             return "\<Right>"
-        endif
-    endif
+        en
+    en
 
     return a:key
 endf
@@ -313,7 +313,7 @@ func! AutoPairsDelete()
             if b[-1:-1] == ' '
                 if a[0] == ' '
                     return "\<BS>\<DELETE>"
-                else
+                el
                     return "\<BS>"
                 end
             end
@@ -336,28 +336,28 @@ endf
 " Fast wrap the word in brackets
 func! AutoPairsFastWrap()
     let c = @"
-    normal! x
+    norm! x
     let [before, after, ig] = s:getline()
     if after[0] =~ '\v[\{\[\(\<]'
-        normal! %
-        normal! p
-    else
+        norm! %
+        norm! p
+    el
         for [open, close, opt] in b:AutoPairsList
             if close == ''
                 continue
             end
             if after =~ '^\s*\V'.open
                 call search(close, 'We')
-                normal! p
+                norm! p
                 let @" = c
                 return ""
             end
         endfor
         if after[1:1] =~ '\v\w'
-            normal! e
-            normal! p
-        else
-            normal! p
+            norm! e
+            norm! p
+        el
+            norm! p
         end
     end
     let @" = c
@@ -405,16 +405,16 @@ func! AutoPairsReturn()
             " https://github.com/jiangmiao/auto-pairs/issues/24
             if &equalprg != ''
                 return "\<ESC>".cmd."O"
-            endif
+            en
 
             " conflict with javascript and coffee
             " javascript   need   indent new line
             " coffeescript forbid indent new line
             if &filetype == 'coffeescript' || &filetype == 'coffee'
                 return "\<ESC>".cmd."k==o"
-            else
+            el
                 return "\<ESC>".cmd."=ko"
-            endif
+            en
         end
     endfor
     return ''
@@ -434,7 +434,7 @@ func! AutoPairsSpace()
         if before =~ '\V'.open.'\v$' && after =~ '^\V'.close
             if close =~ '\v^[''"`]$'
                 return "\<SPACE>"
-            else
+            el
                 return "\<SPACE>\<SPACE>".s:Left
             end
         end
@@ -450,14 +450,14 @@ func! AutoPairsMap(key)
     end
     let escaped_key = substitute(key, "'", "''", 'g')
     " use expr will cause search() doesn't work
-    execute 'inoremap <buffer> <silent> '.key." <C-R>=AutoPairsInsert('".escaped_key."')<CR>"
+    exe  'inoremap <buffer> <silent> '.key." <C-R>=AutoPairsInsert('".escaped_key."')<CR>"
 endf
 
 func! g:AutoPairsToggle()
     if b:autopairs_enabled
         let b:autopairs_enabled = 0
         echo 'AutoPairs Disabled.'
-    else
+    el
         let b:autopairs_enabled = 1
         echo 'AutoPairs Enabled.'
     end
@@ -534,60 +534,63 @@ func! AutoPairsInit()
     endfor
 
 
-    for key in split(b:AutoPairsMoveCharacter, '\s*')
-        let escaped_key = substitute(key, "'", "''", 'g')
-        execute 'inoremap <silent> <buffer> <M-'.key."> <C-R>=AutoPairsMoveCharacter('".escaped_key."')<CR>"
-    endfor
+    "\ 注释掉 避免占用我的keymap
+    "\ for key in split(b:AutoPairsMoveCharacter, '\s*')
+    "\     let escaped_key = substitute(key, "'", "''", 'g')
+    "\     "\ <M-]>留给copilot按
+    "\     exe  'ino <silent> <buffer>'
+    "\         \ '<M-' . key . ">  <C-R>=AutoPairsMoveCharacter('" . escaped_key . "')<CR>"
+    "\ endfor
 
     " Still use <buffer> level mapping for <BS> <SPACE>
     if g:AutoPairsMapBS
         " Use <C-R> instead of <expr> for issue #14 sometimes press BS output strange words
-        execute 'inoremap <buffer> <silent> <BS> <C-R>=AutoPairsDelete()<CR>'
+        exe  'inoremap <buffer> <silent> <BS> <C-R>=AutoPairsDelete()<CR>'
     end
 
     if g:AutoPairsMapCh
-        execute 'inoremap <buffer> <silent> <C-h> <C-R>=AutoPairsDelete()<CR>'
-    endif
+        exe  'inoremap <buffer> <silent> <C-h> <C-R>=AutoPairsDelete()<CR>'
+    en
 
     if g:AutoPairsMapSpace
         " Try to respect abbreviations on a <SPACE>
         let do_abbrev = ""
         if v:version == 703 && has("patch489") || v:version > 703
             let do_abbrev = "<C-]>"
-        endif
-        execute 'inoremap <buffer> <silent> <SPACE> '.do_abbrev.'<C-R>=AutoPairsSpace()<CR>'
+        en
+        exe  'inoremap <buffer> <silent> <SPACE> '.do_abbrev.'<C-R>=AutoPairsSpace()<CR>'
     end
 
     if g:AutoPairsShortcutFastWrap != ''
-        execute 'inoremap <buffer> <silent> '.g:AutoPairsShortcutFastWrap.' <C-R>=AutoPairsFastWrap()<CR>'
+        exe  'inoremap <buffer> <silent> '.g:AutoPairsShortcutFastWrap.' <C-R>=AutoPairsFastWrap()<CR>'
     end
 
     if g:AutoPairsShortcutBackInsert != ''
-        execute 'inoremap <buffer> <silent> '.g:AutoPairsShortcutBackInsert.' <C-R>=AutoPairsBackInsert()<CR>'
+        exe  'inoremap <buffer> <silent> '.g:AutoPairsShortcutBackInsert.' <C-R>=AutoPairsBackInsert()<CR>'
     end
 
     if g:AutoPairsShortcutToggle != ''
         " use <expr> to ensure showing the status when toggle
-        execute 'inoremap <buffer> <silent> <expr> '.g:AutoPairsShortcutToggle.' AutoPairsToggle()'
-        execute 'noremap <buffer> <silent> '.g:AutoPairsShortcutToggle.' :call AutoPairsToggle()<CR>'
+        exe  'inoremap <buffer> <silent> <expr> '.g:AutoPairsShortcutToggle.' AutoPairsToggle()'
+        exe  'noremap <buffer> <silent> '.g:AutoPairsShortcutToggle.' :call AutoPairsToggle()<CR>'
     end
 
     if g:AutoPairsShortcutJump != ''
-        execute 'inoremap <buffer> <silent> ' . g:AutoPairsShortcutJump. ' <ESC>:call AutoPairsJump()<CR>a'
-        execute 'noremap <buffer> <silent> ' . g:AutoPairsShortcutJump. ' :call AutoPairsJump()<CR>'
+        exe  'inoremap <buffer> <silent> ' . g:AutoPairsShortcutJump. ' <ESC>:call AutoPairsJump()<CR>a'
+        exe  'noremap <buffer> <silent> ' . g:AutoPairsShortcutJump. ' :call AutoPairsJump()<CR>'
     end
 
     if &keymap != ''
         let l:imsearch = &imsearch
         let l:iminsert = &iminsert
         let l:imdisable = &imdisable
-        execute 'setlocal keymap=' . &keymap
-        execute 'setlocal imsearch=' . l:imsearch
-        execute 'setlocal iminsert=' . l:iminsert
+        exe  'setl  keymap=' . &keymap
+        exe  'setl  imsearch=' . l:imsearch
+        exe  'setl  iminsert=' . l:iminsert
         if l:imdisable
-            execute 'setlocal imdisable'
-        else
-            execute 'setlocal noimdisable'
+            exe  'setl  imdisable'
+        el
+            exe  'setl  noimdisable'
         end
     end
 
@@ -626,14 +629,14 @@ func! AutoPairsTryInit()
             if empty(info)
                 let old_cr = '<CR>'
                 let is_expr = 0
-            else
+            el
                 let old_cr = info['rhs']
                 let old_cr = s:ExpandMap(old_cr)
                 let old_cr = substitute(old_cr, '<SID>', '<SNR>' . info['sid'] . '_', 'g')
                 let is_expr = info['expr']
                 let wrapper_name = '<SID>AutoPairsOldCRWrapper73'
-            endif
-        else
+            en
+        el
             " VIM version less than 7.3
             " the mapping's <expr> info is lost, so guess it is expr or not, it's
             " not accurate.
@@ -641,7 +644,7 @@ func! AutoPairsTryInit()
             if old_cr == ''
                 let old_cr = '<CR>'
                 let is_expr = 0
-            else
+            el
                 let old_cr = s:ExpandMap(old_cr)
                 " old_cr contain (, I guess the old cr is in expr mode
                 let is_expr = old_cr =~ '\V(' && toupper(old_cr) !~ '\V<C-R>'
@@ -655,18 +658,18 @@ func! AutoPairsTryInit()
         if old_cr !~ 'AutoPairsReturn'
             if is_expr
                 " remap <expr> to `name` to avoid mix expr and non-expr mode
-                execute 'inoremap <buffer> <expr> <script> '. wrapper_name . ' ' . old_cr
+                exe  'inoremap <buffer> <expr> <script> '. wrapper_name . ' ' . old_cr
                 let old_cr = wrapper_name
             end
             " Always silent mapping
-            execute 'inoremap <script> <buffer> <silent> <CR> '.old_cr.'<SID>AutoPairsReturn'
+            exe  'inoremap <script> <buffer> <silent> <CR> '.old_cr.'<SID>AutoPairsReturn'
         end
-    endif
+    en
     call AutoPairsInit()
 endf
 
 " Always silent the command
-inoremap <silent> <SID>AutoPairsReturn <C-R>=AutoPairsReturn()<CR>
+ino  <silent> <SID>AutoPairsReturn <C-R>=AutoPairsReturn()<CR>
 imap <script>    <Plug>AutoPairsReturn <SID>AutoPairsReturn
 
 
